@@ -98,5 +98,7 @@ export class BotService {
     }
 
     availableBot.cook(firstUncookedOrder);
+    firstUncookedOrder.cookedBy = availableBot;
+    firstUncookedOrder.cookingAt = new Date();
   }
 }
