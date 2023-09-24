@@ -7,8 +7,9 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "npm run prebuild && tsc -p tsconfig.build.json",
+    "build:dev": "npm run prebuild && tsc",
     "watch": "npm run prebuild && tsc -p tsconfig.build.json -w",
-    "test": "npm run build && node --experimental-vm-modules -r source-map-support/register node_modules/jest/bin/jest"
+    "test": "npm run build:dev && node --experimental-vm-modules -r source-map-support/register node_modules/jest/bin/jest"
   },
   "author": "",
   "license": "ISC",

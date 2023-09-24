@@ -16,5 +16,5 @@
     "noImplicitAny": true,
     "moduleResolution": "NodeNext"
   },
-  "include": ["./src/**/*.mts", "src/app.module.spec.ts"]
+  "include": ["./src/**/*.mts"]
 }

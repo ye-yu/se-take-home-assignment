@@ -1,7 +1,7 @@
 import type { Config } from "jest";
 
 const jestConfig: Config = {
-  testRegex: ["dist/.*\\.(test|spec)\\.js$"],
+  testRegex: ["dist/.*\\.(test|spec)\\.mjs$"],
   transform: {},
 };
 
