@@ -73,7 +73,7 @@ export class BotService {
     this.cookingBots[name].shutdown();
   }
 
-  cook(orderName: string) {
+  makeNewOrder(orderName: string) {
     const orderItem: OrderItem = {
       orderId: this.orderHistory.length,
       orderName,
@@ -82,6 +82,7 @@ export class BotService {
     };
     this.orderHistory[orderItem.orderId] = orderItem;
     this.uncookedOrders[orderItem.orderId] = orderItem;
+    this.cookNextOrderIfExists();
   }
 
   cookNextOrderIfExists() {
