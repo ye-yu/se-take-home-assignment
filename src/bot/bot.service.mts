@@ -27,6 +27,7 @@ export class BotService {
         this.logger.warn(
           `Order ID ${orderId} is issued finished but order is not found!`
         );
+        return;
       }
       orderItem.status = "finished";
       orderItem.finishedAt = new Date();
@@ -40,6 +41,7 @@ export class BotService {
         this.logger.warn(
           `Order ID ${orderId} is issued unfinished but order is not found!`
         );
+        return;
       }
       orderItem.status = "failed";
       this.uncookedOrders[orderId] = orderItem;
@@ -73,32 +75,26 @@ export class BotService {
     this.cookingBots[name].shutdown();
   }
 
-  makeNewOrder(orderName: string) {
-    const orderItem: OrderItem = {
-      orderId: this.orderHistory.length,
-      orderName,
-      status: "unprepared",
-      orderedAt: new Date(),
-    };
-    this.orderHistory[orderItem.orderId] = orderItem;
-    this.uncookedOrders[orderItem.orderId] = orderItem;
-    this.cookNextOrderIfExists();
-  }
-
-  cookNextOrderIfExists() {
-    const firstUncookedOrder = Object.values(this.uncookedOrders)[0];
-    if (!firstUncookedOrder) {
-      return;
-    }
+  startCooking(orderItem: OrderItem): CookingBot | null {
     const availableBot = Object.values(this.cookingBots).find(
       (e) => !e.isCooking
     );
     if (!availableBot) {
-      return;
+      return null;
     }
 
-    availableBot.cook(firstUncookedOrder);
-    firstUncookedOrder.cookedBy = availableBot;
-    firstUncookedOrder.cookingAt = new Date();
+    const cookingStarted = availableBot.cook(orderItem);
+    if (!cookingStarted) {
+      return null;
+    }
+    return availableBot;
+  }
+
+  cookNextOrderIfExists() {
+    this.eventEmitter.emit("ready");
+  }
+
+  onBotReady(handler: () => void) {
+    this.eventEmitter.addListener("ready", handler);
   }
 }
