@@ -46,7 +46,7 @@ export class BotService {
       orderItem.status = "failed";
       this.uncookedOrders[orderId] = orderItem;
       delete this.pendingOrders[orderId];
-      this.cookNextOrderIfExists();
+      this.emitBotReady();
     });
 
     this.eventEmitter.on("shutdown", (botId) => {
@@ -61,7 +61,7 @@ export class BotService {
     });
 
     this.eventEmitter.on("bootup", () => {
-      this.cookNextOrderIfExists();
+      this.emitBotReady();
     });
   }
 
@@ -90,7 +90,7 @@ export class BotService {
     return availableBot;
   }
 
-  cookNextOrderIfExists() {
+  emitBotReady() {
     this.eventEmitter.emit("ready");
   }
 
