@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { BotService } from "../bot/bot.service.mjs";
 import { OrderItem } from "../bot/interfaces/order-item.interface.mjs";
 import { CustomerTypeEnum } from "./constants/customer-type.enum.mjs";
@@ -7,10 +7,35 @@ import { CustomerTypeEnum } from "./constants/customer-type.enum.mjs";
 export class OrderService {
   vipOrders: Record<number, OrderItem> = {};
   regularOrders: Record<number, OrderItem> = {};
-  orderHistory: Record<string, OrderItem> = {};
+  orderHistory: Record<number, OrderItem> = {};
   orderSequence = 0;
+  logger = new Logger(OrderService.name);
   constructor(readonly botService: BotService) {
     this.botService.onBotReady(() => this.sendOrdersToKitchen());
+    this.botService.onBotFinished((orderId) => {
+      const orderItem = this.orderHistory[orderId];
+      if (!orderItem) {
+        this.logger.warn(
+          `Order ID ${orderId} is issued finished but order is not found!`
+        );
+        return;
+      }
+      orderItem.status = "finished";
+      orderItem.finishedAt = new Date();
+      delete this.vipOrders[orderId];
+      delete this.regularOrders[orderId];
+    });
+    this.botService.onBotUnfinished((orderId) => {
+      const orderItem = this.orderHistory[orderId];
+      if (!orderItem) {
+        this.logger.warn(
+          `Order ID ${orderId} is issued unfinished but order is not found!`
+        );
+        return;
+      }
+      orderItem.status = "unprepared";
+      this.sendOrdersToKitchen();
+    });
   }
 
   makeNewOrder(orderName: string, customerType: CustomerTypeEnum): OrderItem {

@@ -8,10 +8,6 @@ import { randomUUID } from "crypto";
 @Injectable()
 export class BotService {
   cookingBots: Record<string, CookingBot> = {};
-  orderHistory = new Array<OrderItem>();
-  uncookedOrders: Record<number, OrderItem> = {};
-  pendingOrders: Record<number, OrderItem> = {};
-  finishedOrders: Record<number, OrderItem> = {};
 
   eventEmitter: CookingStatusEventEmitter = new EventEmitter();
   logger = new Logger(BotService.name);
@@ -21,34 +17,6 @@ export class BotService {
   }
 
   initEventEmitter() {
-    this.eventEmitter.on("finished", (orderId) => {
-      const orderItem = this.orderHistory[orderId];
-      if (!orderItem) {
-        this.logger.warn(
-          `Order ID ${orderId} is issued finished but order is not found!`
-        );
-        return;
-      }
-      orderItem.status = "finished";
-      orderItem.finishedAt = new Date();
-      this.finishedOrders[orderId] = orderItem;
-      delete this.pendingOrders[orderId];
-    });
-
-    this.eventEmitter.on("unfinished", (orderId) => {
-      const orderItem = this.orderHistory[orderId];
-      if (!orderItem) {
-        this.logger.warn(
-          `Order ID ${orderId} is issued unfinished but order is not found!`
-        );
-        return;
-      }
-      orderItem.status = "failed";
-      this.uncookedOrders[orderId] = orderItem;
-      delete this.pendingOrders[orderId];
-      this.emitBotReady();
-    });
-
     this.eventEmitter.on("shutdown", (botId) => {
       const cookingBot = this.cookingBots[botId];
       if (!cookingBot) {
@@ -96,5 +64,13 @@ export class BotService {
 
   onBotReady(handler: () => void) {
     this.eventEmitter.addListener("ready", handler);
+  }
+
+  onBotFinished(handler: (orderId: number) => void) {
+    this.eventEmitter.addListener("finished", handler);
+  }
+
+  onBotUnfinished(handler: (orderId: number) => void) {
+    this.eventEmitter.addListener("unfinished", handler);
   }
 }
