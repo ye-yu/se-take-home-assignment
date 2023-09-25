@@ -1,6 +1,6 @@
-import EventEmitter from "events";
+import { EventEmitter2 } from "eventemitter2";
 
-export interface CookingStatusEventEmitter extends EventEmitter {
+export interface CookingStatusEventEmitter extends EventEmitter2 {
   emit(event: "finished" | "unfinished", orderId: number): boolean;
   emit(event: "bootup" | "shutdown", botName: string): boolean;
   emit(event: "ready"): boolean;

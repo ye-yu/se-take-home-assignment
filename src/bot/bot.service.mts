@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CookingBot } from "./cooking.bot.mjs";
-import EventEmitter from "events";
+import { default as ee } from "eventemitter2";
 import { CookingStatusEventEmitter } from "./interfaces/cooking-status-EE.interface.mjs";
 import { OrderItem } from "./interfaces/order-item.interface.mjs";
 import { randomUUID } from "crypto";
@@ -9,7 +9,8 @@ import { randomUUID } from "crypto";
 export class BotService {
   cookingBots: Record<string, CookingBot> = {};
 
-  eventEmitter: CookingStatusEventEmitter = new EventEmitter();
+  eventEmitter: CookingStatusEventEmitter =
+    new ee.EventEmitter2() as CookingStatusEventEmitter;
   logger = new Logger(BotService.name);
 
   constructor() {
