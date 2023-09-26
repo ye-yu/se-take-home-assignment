@@ -56,7 +56,23 @@ describe("Customer Order", () => {
     botService.installNewBot();
     await botReadyEvent;
 
+    const updatedOrderAfterPickUp = orderService.getOrderInfo(order.orderId);
+    expect(updatedOrderAfterPickUp.status).toBe(OrderStatus.COOKING);
+  });
+
+  it('should be able to see order flowing from "PENDING" to "COMPLETED" on finished cooking', async () => {
+    botService.installNewBot();
+    const order = orderService.makeNewOrder("McBurger", customerType);
+
+    // strategy: polling, status immediately goes to cooking because bot is available
+    const updatedOrder = orderService.getOrderInfo(order.orderId);
+    expect(updatedOrder.status).toBe(OrderStatus.COOKING);
+
+    const botFinishedEvent = botService.eventEmitter.waitFor("finished");
+    jest.runAllTimers();
+    await botFinishedEvent;
+
     const updatedOrderAfterCooking = orderService.getOrderInfo(order.orderId);
-    expect(updatedOrderAfterCooking.status).toBe(OrderStatus.COOKING);
+    expect(updatedOrderAfterCooking.status).toBe(OrderStatus.COMPLETED);
   });
 });
