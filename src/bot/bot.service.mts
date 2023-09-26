@@ -42,6 +42,12 @@ export class BotService {
     cookingBot.cookingStatusEventEmitter.emit("bootup", name);
   }
 
+  uninstallOneBot() {
+    Object.values(this.cookingBots)
+      .find((e) => e)
+      ?.shutdown();
+  }
+
   shutdownBot(name: string) {
     this.cookingBots[name].shutdown();
   }
