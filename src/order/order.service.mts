@@ -34,7 +34,7 @@ export class OrderService {
         );
         return;
       }
-      orderItem.status = OrderStatus.UNFINISHED;
+      orderItem.status = OrderStatus.PENDING;
       this.sendOrdersToKitchen();
     });
   }
