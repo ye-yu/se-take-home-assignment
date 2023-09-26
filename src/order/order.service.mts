@@ -8,6 +8,7 @@ export class OrderService {
   vipOrders: Record<number, OrderItem> = {};
   regularOrders: Record<number, OrderItem> = {};
   orderHistory: Record<number, OrderItem> = {};
+  orderListener: Record<number, (status: OrderItem["status"]) => void> = {};
   orderSequence = 0;
   logger = new Logger(OrderService.name);
   constructor(readonly botService: BotService) {
@@ -22,8 +23,10 @@ export class OrderService {
       }
       orderItem.status = "finished";
       orderItem.finishedAt = new Date();
+      this.orderListener[orderId]?.(orderItem.status);
       delete this.vipOrders[orderId];
       delete this.regularOrders[orderId];
+      delete this.orderListener[orderId];
     });
     this.botService.onBotUnfinished((orderId) => {
       const orderItem = this.orderHistory[orderId];
@@ -34,6 +37,7 @@ export class OrderService {
         return;
       }
       orderItem.status = "unprepared";
+      this.orderListener[orderId]?.(orderItem.status);
       this.sendOrdersToKitchen();
     });
   }
@@ -58,6 +62,17 @@ export class OrderService {
     this.orderHistory[orderItem.orderId] = orderItem;
     this.sendOrdersToKitchen();
     return orderItem;
+  }
+
+  listenToOrderEvents(
+    orderId: number,
+    listener: (status: OrderItem["status"]) => void
+  ) {
+    const orderItem = this.orderHistory[orderId];
+    if (!orderItem) {
+      throw new Error(`Order ID ${orderId} is not found!`, { cause: orderId });
+    }
+    this.orderListener[orderItem.orderId] = listener;
   }
 
   sendOrdersToKitchen() {
