@@ -1,11 +1,11 @@
 import { INestApplication } from "@nestjs/common";
 import { TestingModule, Test } from "@nestjs/testing";
-import { AppModule } from "../../app.module.mjs";
-import { BotService } from "../../bot/bot.service.mjs";
-import { OrderService } from "../order.service.mjs";
-import { CustomerTypeEnum } from "../constants/customer-type.enum.mjs";
-import { OrderStatus } from "../constants/order-status.enum.mjs";
 import { jest } from "@jest/globals";
+import { AppModule } from "../app.module.mjs";
+import { BotService } from "../bot/bot.service.mjs";
+import { CustomerTypeEnum } from "../order/constants/customer-type.enum.mjs";
+import { OrderStatus } from "../order/constants/order-status.enum.mjs";
+import { OrderService } from "../order/order.service.mjs";
 
 /**
  * As McDonald's normal customer, after I submitted my order,
