@@ -1,9 +1,10 @@
+import { OrderStatus } from "../../order/constants/order-status.enum.mjs";
 import { CookingBot } from "../cooking.bot.mjs";
 
 export interface OrderItem {
   orderId: number;
   orderName: string;
-  status: "unprepared" | "cooking" | "failed" | "finished";
+  status: OrderStatus;
   cookedBy?: CookingBot;
   orderedAt: Date;
   cookingAt?: Date;

@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { BotService } from "../bot/bot.service.mjs";
 import { OrderItem } from "../bot/interfaces/order-item.interface.mjs";
 import { CustomerTypeEnum } from "./constants/customer-type.enum.mjs";
+import { OrderStatus } from "./constants/order-status.enum.mjs";
 
 @Injectable()
 export class OrderService {
@@ -20,7 +21,7 @@ export class OrderService {
         );
         return;
       }
-      orderItem.status = "finished";
+      orderItem.status = OrderStatus.FINISHED;
       orderItem.finishedAt = new Date();
       delete this.vipOrders[orderId];
       delete this.regularOrders[orderId];
@@ -33,7 +34,7 @@ export class OrderService {
         );
         return;
       }
-      orderItem.status = "unprepared";
+      orderItem.status = OrderStatus.UNFINISHED;
       this.sendOrdersToKitchen();
     });
   }
@@ -42,7 +43,7 @@ export class OrderService {
     const orderItem: OrderItem = {
       orderId: ++this.orderSequence,
       orderName,
-      status: "unprepared",
+      status: OrderStatus.PENDING,
       orderedAt: new Date(),
     };
     switch (customerType) {
@@ -75,7 +76,7 @@ export class OrderService {
     }
 
     orderToCook.cookingAt = new Date();
-    orderToCook.status = "cooking";
+    orderToCook.status = OrderStatus.COOKING;
     orderToCook.cookedBy = cookingBotFound;
   }
 
