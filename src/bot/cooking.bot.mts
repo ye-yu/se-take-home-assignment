@@ -46,6 +46,9 @@ export class CookingBot {
     const { orderId, orderName } = this.order;
     const orderSummary = `${orderId} - ${orderName}`;
     this.logger.log(`Bot has finished cooking ${orderSummary}.`);
-    this.cookingStatusEventEmitter.emit("finished", this.order.orderId);
+    this.isCooking = false;
+    this.order = null;
+    this.cookingStatusEventEmitter.emit("finished", orderId);
+    this.cookingStatusEventEmitter.emit("ready");
   }
 }
