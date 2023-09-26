@@ -21,7 +21,7 @@ export class OrderService {
         );
         return;
       }
-      orderItem.status = OrderStatus.FINISHED;
+      orderItem.status = OrderStatus.COMPLETED;
       orderItem.finishedAt = new Date();
       delete this.vipOrders[orderId];
       delete this.regularOrders[orderId];
