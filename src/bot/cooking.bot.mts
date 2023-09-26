@@ -13,8 +13,6 @@ export class CookingBot {
     readonly name: string
   ) {
     this.logger = new Logger(`${CookingBot.name + this.name}`);
-    this.logger.log("Booting up bot");
-    this.cookingStatusEventEmitter.emit("bootup", this.name);
   }
 
   cook(order: OrderItem): boolean {

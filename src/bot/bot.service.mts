@@ -38,6 +38,8 @@ export class BotService {
     const name = randomUUID();
     const cookingBot = new CookingBot(this.eventEmitter, name);
     this.cookingBots[name] = cookingBot;
+    this.logger.log("Booting up bot");
+    cookingBot.cookingStatusEventEmitter.emit("bootup", name);
   }
 
   shutdownBot(name: string) {
