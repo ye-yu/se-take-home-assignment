@@ -5,7 +5,10 @@ import { OrderItem } from "./interfaces/order-item.interface.mjs";
 export class CookingBot {
   isCooking = false; // aka is busy
   order: null | OrderItem;
-  cookingDuration = 10;
+  cookingDuration = 1;
+  currentCookingDuration = 0;
+  currentCookingDurationUpdateInterval: NodeJS.Timeout | null = null;
+  finishedTimeout: NodeJS.Timeout | null = null;
   logger: Logger;
 
   constructor(
@@ -25,22 +28,34 @@ export class CookingBot {
     this.isCooking = true;
     this.order = order;
     this.logger.log(`Bot is now cooking ${orderSummary}.`);
-    setTimeout(() => {
+
+    this.currentCookingDuration = this.cookingDuration;
+    this.currentCookingDurationUpdateInterval = setInterval(() => {
+      this.currentCookingDuration -= 1;
+    }, 1000);
+
+    this.finishedTimeout = setTimeout(() => {
       this.finished();
     }, this.cookingDuration * 1000);
     return true;
   }
 
   shutdown() {
-    if (this.isCooking) {
-      this.cookingStatusEventEmitter.emit("unfinished", this.order!.orderId);
+    if (this.finishedTimeout) {
+      clearTimeout(this.finishedTimeout);
+      this.finishedTimeout = null;
     }
     this.cookingStatusEventEmitter.emit("shutdown", this.name);
+    if (this.isCooking) {
+      const { orderId } = this.order!;
+      this.isCooking = false;
+      this.order = null;
+      this.cookingStatusEventEmitter.emit("unfinished", orderId);
+    }
   }
 
   finished() {
     if (!this.order) {
-      this.logger.warn(`Order finished is emitted but there is no order item!`);
       return;
     }
     const { orderId, orderName } = this.order;
@@ -50,5 +65,10 @@ export class CookingBot {
     this.order = null;
     this.cookingStatusEventEmitter.emit("finished", orderId);
     this.cookingStatusEventEmitter.emit("ready");
+
+    if (this.currentCookingDurationUpdateInterval) {
+      clearInterval(this.currentCookingDurationUpdateInterval);
+      this.currentCookingDurationUpdateInterval = null;
+    }
   }
 }
