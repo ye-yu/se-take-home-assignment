@@ -42,6 +42,15 @@ export class BotService {
     cookingBot.cookingStatusEventEmitter.emit("bootup", name);
   }
 
+  installNewVipBot() {
+    const name = `VIP ${randomUUID()}`;
+    const cookingBot = new CookingBot(this.eventEmitter, name);
+    cookingBot.cookingDuration = 2;
+    this.cookingBots[name] = cookingBot;
+    this.logger.log("Booting up bot");
+    cookingBot.cookingStatusEventEmitter.emit("bootup", name);
+  }
+
   uninstallOneBot() {
     Object.values(this.cookingBots)
       .find((e) => e)
@@ -53,9 +62,9 @@ export class BotService {
   }
 
   startCooking(orderItem: OrderItem): CookingBot | null {
-    const availableBot = Object.values(this.cookingBots).find(
-      (e) => !e.isCooking
-    );
+    const availableBot = Object.values(this.cookingBots)
+      .sort((a, b) => a.cookingDuration - b.cookingDuration)
+      .find((e) => !e.isCooking);
     if (!availableBot) {
       return null;
     }

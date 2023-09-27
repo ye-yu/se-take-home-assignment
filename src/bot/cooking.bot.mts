@@ -5,7 +5,7 @@ import { OrderItem } from "./interfaces/order-item.interface.mjs";
 export class CookingBot {
   isCooking = false; // aka is busy
   order: null | OrderItem;
-  cookingDuration = 1;
+  cookingDuration = 5;
   currentCookingDuration = 0;
   currentCookingDurationUpdateInterval: NodeJS.Timeout | null = null;
   finishedTimeout: NodeJS.Timeout | null = null;
@@ -66,6 +66,7 @@ export class CookingBot {
     this.cookingStatusEventEmitter.emit("finished", orderId);
     this.cookingStatusEventEmitter.emit("ready");
 
+    this.currentCookingDuration = 0;
     if (this.currentCookingDurationUpdateInterval) {
       clearInterval(this.currentCookingDurationUpdateInterval);
       this.currentCookingDurationUpdateInterval = null;
