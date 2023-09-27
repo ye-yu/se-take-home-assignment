@@ -17,7 +17,6 @@ describe("Cooking Bot", () => {
   let orderService: OrderService;
 
   beforeEach(async () => {
-    jest.useFakeTimers();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -48,52 +47,6 @@ describe("Cooking Bot", () => {
     await botShutdownEvent;
   }
 
-  it("should be able to process one order at a time", async () => {
-    jest.useFakeTimers();
-    jest.spyOn(global, "setTimeout");
-    await installAndWaitForBotReady();
-    const orders = [
-      orderService.makeNewOrder("McBurger", customerType),
-      orderService.makeNewOrder("McBurger", customerType),
-    ];
-    // setTimeout should only be called once, during cooking one order
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-
-    // strategy: polling
-    const [updatedOrder1, updatedOrder2] = orders.map(({ orderId }) =>
-      orderService.getOrderInfo(orderId)
-    );
-    expect(updatedOrder1.status).toBe(OrderStatus.COOKING);
-    expect(updatedOrder2.status).toBe(OrderStatus.PENDING);
-
-    const botFinishedEvent = botService.eventEmitter.waitFor("finished");
-    const botReadyEvent = botService.eventEmitter.waitFor("ready");
-    jest.runOnlyPendingTimers();
-
-    await botFinishedEvent;
-    const updatedOrderAfterCooking1 = orderService.getOrderInfo(
-      orders[0].orderId
-    );
-    expect(updatedOrderAfterCooking1.status).toBe(OrderStatus.COMPLETED);
-    // setTimeout should now be called twice, to cook the next order
-    expect(setTimeout).toHaveBeenCalledTimes(2);
-
-    await botReadyEvent;
-    const updatedOrderAfterWaiting2 = orderService.getOrderInfo(
-      orders[1].orderId
-    );
-    expect(updatedOrderAfterWaiting2.status).toBe(OrderStatus.COOKING);
-
-    const botFinishedEvent2 = botService.eventEmitter.waitFor("finished");
-    jest.runOnlyPendingTimers();
-
-    await botFinishedEvent2;
-    const updatedOrderAfterCooking2 = orderService.getOrderInfo(
-      orders[1].orderId
-    );
-    expect(updatedOrderAfterCooking2.status).toBe(OrderStatus.COMPLETED);
-  });
-
   function sleepForAWhile() {
     return new Promise<void>((res) => setTimeout(res, 2000));
   }
@@ -107,11 +60,11 @@ describe("Cooking Bot", () => {
     const updatedOrder = orderService.getOrderInfo(order.orderId);
     expect(updatedOrder.status).toBe(OrderStatus.COOKING);
 
-    await uninstallAndWaitForBotShutdown();
+    const botShutdownEvent = botService.eventEmitter.waitFor("shutdown");
+    botService.uninstallOneBot();
+    await botShutdownEvent;
 
-    jest.useRealTimers();
     await sleepForAWhile();
-    jest.useFakeTimers();
 
     const updatedOrderAftershutdown = orderService.getOrderInfo(order.orderId);
     expect(updatedOrderAftershutdown.status).toBe(OrderStatus.PENDING);

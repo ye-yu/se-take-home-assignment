@@ -41,6 +41,8 @@ describe("Customer Order", () => {
 
     // strategy: polling
     const updatedOrder = orderService.getOrderInfo(order.orderId);
+    updatedOrder.cookedBy?.cookingDuration;
+
     expect(updatedOrder.status).toBe(OrderStatus.PENDING);
   });
 
